@@ -261,7 +261,12 @@ namespace FunctionalExtras.Category
         return false;
       }
 
-      return maybe._value.Equals(_value);
+      if(maybe.IsNothing() && this.IsNothing())
+      {
+        return true;
+      }
+
+      return maybe._value.Equals(this._value);
     }
 
     public override string ToString()
