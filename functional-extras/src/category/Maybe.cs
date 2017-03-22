@@ -69,6 +69,23 @@ namespace FunctionalExtras.Category
       return new Maybe<R>(value, false);
     }
 
+    public static Func<Maybe<T>, R> MaybeMap<T, R>(R defaultValue, Func<T, R> mapper)
+    {
+      return instance => MaybeMap<T, R>(defaultValue, mapper, instance);
+    }
+
+    public static R MaybeMap<T, R>(R defaultValue, Func<T, R> mapper, Maybe<T> maybe)
+    {
+      if(maybe != null && maybe.IsJust())
+      {
+        return mapper(maybe._value);
+      }
+      else
+      {
+        return defaultValue;
+      }
+    }
+
     public static Maybe<R> Nothing<R>()
     {
       return new Maybe<R>(default(R), true);

@@ -119,6 +119,41 @@ namespace FunctionalExtras.Tests
           Assert.IsType<ArgumentException>(exception);
         }
       }
+
+      public class MaybeMap
+      {
+        private readonly string _defaultValue = "default";
+        private Func<bool, string> _defaultMapper = b => b.ToString();
+
+        [Fact]
+        public void shouldApplyMapperForJust()
+        {
+          string actualResult = Maybe<string>.MaybeMap(_defaultValue, _defaultMapper, _testMaybe);
+          string expectedResult = _testValue.ToString();
+
+          Assert.Equal(expectedResult, actualResult);
+        }
+
+        [Fact]
+        public void shouldReturnDefaultValueForNull()
+        {
+          Maybe<bool> testMaybe = null;
+          string expectedResult = _defaultValue;
+          string actualResult = Maybe<string>.MaybeMap(_defaultValue, _defaultMapper, testMaybe);
+
+          Assert.Equal(expectedResult, actualResult);
+        }
+
+        [Fact]
+        public void shouldReturnDefaultValueForNothing()
+        {
+          Maybe<bool> testMaybe = Maybe<bool>.Nothing<bool>();
+          string expectedResult = _defaultValue;
+          string actualResult = Maybe<string>.MaybeMap(_defaultValue, _defaultMapper, testMaybe);
+
+          Assert.Equal(expectedResult, actualResult);
+        }
+      }
     }
   }
 }
