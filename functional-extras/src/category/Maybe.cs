@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace FunctionalExtras.Category
 {
@@ -42,9 +43,21 @@ namespace FunctionalExtras.Category
       return maybe ?? Nothing<R>();
     }
 
+    public static Maybe<R> From<R>(IList<R> list)
+    {
+      return (list == null || list.Count <= 0)
+        ? Nothing<R>()
+        : OfNullable(list[0]);
+    }
+
     public static R FromJust<R>(Maybe<R> maybe)
     {
       Objects.RequireNonNull(maybe, "maybe must not be null");
+
+      if(maybe.IsNothing())
+      {
+        throw new ArgumentException("maybe must not be Nothing");
+      }
 
       return maybe._value;
     }
