@@ -116,11 +116,13 @@ namespace FunctionalExtras.Category
     {
       Objects.RequireNonNull(other, "other must not be null");
 
-      Maybe<Maybe<R>> maybe = other.Map<Maybe<R>>(Map);
-
-      if(maybe.IsJust())
+      if(other.IsJust())
       {
-        return FromJust(maybe);
+        Maybe<Maybe<R>> maybe = other.Map<Maybe<R>>(Map);
+
+        return maybe.IsJust()
+          ? FromJust(maybe)
+          : Nothing<R>();
       }
       else
       {
@@ -141,16 +143,24 @@ namespace FunctionalExtras.Category
       {
         Maybe<Maybe<R>> maybe = Map<Maybe<R>>(mapper);
 
-        if(maybe.IsJust())
-        {
-          return FromJust(maybe);
-        }
-        else
-        {
-          return Nothing<R>();
-        }
+        return maybe.IsJust()
+          ? FromJust(maybe)
+          : Nothing<R>();
       }
       else
+      {
+        return Nothing<R>();
+      }
+    }
+
+    public Maybe<R> CheckedMap<R>(Func<V, R> mapper)
+    {
+      try
+      {
+        return IsJust()
+          ? OfNullable(mapper(_value))
+          : Nothing<R>();
+      } catch
       {
         return Nothing<R>();
       }
@@ -182,6 +192,20 @@ namespace FunctionalExtras.Category
     public Maybe<R> FlatMap<R>(Func<V, Maybe<R>> mapper)
     {
       return Chain(mapper);
+    }
+
+    public R FoldLeft<R>(Func<R, V, R> morphism, R initialValue)
+    {
+      Objects.RequireNonNull(morphism, "morphism must not be null");
+
+      return morphism(initialValue, _value);
+    }
+
+    public R FoldRight<R>(Func<V, R, R> morphism, R initialValue)
+    {
+      Objects.RequireNonNull(morphism, "morphism must not be null");
+
+      return morphism(_value, initialValue);
     }
 
     public V GetOrElse(V otherValue)

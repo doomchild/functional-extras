@@ -238,6 +238,157 @@ namespace FunctionalExtras.Tests
 
           Assert.Equal(expectedResult, actualResult);
         }
+
+        [Fact]
+        public void shouldReturnInstanceForNothingAlt()
+        {
+          Maybe<bool> testAlt = Maybe<bool>.Nothing<bool>();
+          Maybe<bool> expectedResult = _testMaybe;
+          Maybe<bool> actualResult = _testMaybe.Alt(testAlt);
+
+          Assert.Equal(expectedResult, actualResult);
+        }
+
+        [Fact]
+        public void shouldReturnAltForJustAlt()
+        {
+          Maybe<bool> testMaybe = Maybe<bool>.Nothing<bool>();
+          Maybe<bool> testAlt = Maybe<bool>.Just(_testValue);
+          Maybe<bool> expectedResult = testAlt;
+          Maybe<bool> actualResult = testMaybe.Alt(testAlt);
+
+          Assert.Equal(expectedResult, actualResult);
+        }
+
+        [Fact]
+        public void shouldReturnInstanceForJustInstance()
+        {
+          Maybe<bool> testAlt = Maybe<bool>.Just(!_testValue);
+          Maybe<bool> expectedResult = _testMaybe;
+          Maybe<bool> actualResult = _testMaybe.Alt(testAlt);
+
+          Assert.Equal(expectedResult, actualResult);
+        }
+
+        public class Ap
+        {
+          [Fact]
+          public void shouldApplyForJustOfValueAndFunction()
+          {
+            Maybe<Func<bool, bool>> testApply = Maybe<Func<bool, bool>>.Just<Func<bool, bool>>(b => !b);
+            Maybe<bool> expectedResult = Maybe<bool>.Just(!_testValue);
+            Maybe<bool> actualResult = _testMaybe.Ap(testApply);
+
+            Assert.Equal(expectedResult, actualResult);
+          }
+
+          [Fact]
+          public void shouldNotApplyForNothingOfFunction()
+          {
+            Maybe<Func<bool, bool>> testApply = Maybe<Func<bool, bool>>.Nothing<Func<bool, bool>>();
+            Maybe<bool> expectedResult = Maybe<bool>.Nothing<bool>();
+            Maybe<bool> actualResult = _testMaybe.Ap(testApply);
+
+            Assert.Equal(expectedResult, actualResult);
+          }
+
+          [Fact]
+          public void shouldNotApplyForNothingOfValue()
+          {
+            Maybe<bool> testMaybe = Maybe<bool>.Nothing<bool>();
+            Maybe<Func<bool, bool>> testApply = Maybe<bool>.Just<Func<bool, bool>>(b => !b);
+            Maybe<bool> expectedResult = Maybe<bool>.Nothing<bool>();
+            Maybe<bool> actualResult = testMaybe.Ap(testApply);
+
+            Assert.Equal(expectedResult, actualResult);
+          }
+        }
+
+        public class Bind
+        {
+          [Fact]
+          public void shouldAliasChain()
+          {
+            Func<bool, Maybe<bool>> testChain = value => Maybe<bool>.Just(!value);
+            Maybe<bool> expectedResult = _testMaybe.Chain(testChain);
+            Maybe<bool> actualResult = _testMaybe.Bind(testChain);
+
+            Assert.Equal(expectedResult, actualResult);
+          }
+        }
+
+        public class Chain
+        {
+          [Fact]
+          public void shouldChainForJust()
+          {
+            Func<bool, Maybe<bool>> testChain = value => Maybe<bool>.Just(!value);
+            Maybe<bool> expectedResult = Maybe<bool>.Just(!_testValue);
+            Maybe<bool> actualResult = _testMaybe.Chain(testChain);
+
+            Assert.Equal(expectedResult, actualResult);
+          }
+
+          [Fact]
+          public void shouldNotChainForNothing()
+          {
+            Maybe<bool> testMaybe = Maybe<bool>.Nothing<bool>();
+            Func<bool, Maybe<bool>> testChain = value => Maybe<bool>.Just(!value);
+            Maybe<bool> expectedResult = Maybe<bool>.Nothing<bool>();
+            Maybe<bool> actualResult = testMaybe.Chain(testChain);
+
+            Assert.Equal(expectedResult, actualResult);
+          }
+        }
+
+        public class CheckedMap
+        {
+          private Func<bool, bool> _testMap = b => !b;
+          private Func<bool, bool> _testThrowMap = value => throw new Exception();
+
+          [Fact]
+          public void shouldMapForJust()
+          {
+            Maybe<bool> testMaybe = Maybe<bool>.Just(_testValue);
+            Maybe<bool> expectedResult = Maybe<bool>.Just(!_testValue);
+            Maybe<bool> actualResult = testMaybe.CheckedMap(_testMap);
+
+            Assert.Equal(expectedResult, actualResult);
+          }
+
+          [Fact]
+          public void shouldNotMapForNothing()
+          {
+            Maybe<bool> testMaybe = Maybe<bool>.Nothing<bool>();
+            Maybe<bool> expectedResult = Maybe<bool>.Nothing<bool>();
+            Maybe<bool> actualResult = testMaybe.CheckedMap(_testMap);
+
+            Assert.Equal(expectedResult, actualResult);
+          }
+
+          [Fact]
+          public void shouldMapThrownToNothing()
+          {
+            Maybe<bool> testMaybe = Maybe<bool>.Just(_testValue);
+            Maybe<bool> expectedResult = Maybe<bool>.Nothing<bool>();
+            Maybe<bool> actualResult = testMaybe.CheckedMap(_testThrowMap);
+
+            Assert.Equal(expectedResult, actualResult);
+          }
+        }
+
+        public class Coalesce
+        {
+          [Fact]
+          public void shouldAliasAlt()
+          {
+            Maybe<bool> testMaybe = Maybe<bool>.Nothing<bool>();
+            Maybe<bool> expectedResult = testMaybe.Alt(_testMaybe);
+            Maybe<bool> actualResult = testMaybe.Coalesce(_testMaybe);
+
+            Assert.Equal(expectedResult, actualResult);
+          }
+        }
       }
     }
   }
