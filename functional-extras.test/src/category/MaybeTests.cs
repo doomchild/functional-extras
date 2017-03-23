@@ -223,5 +223,22 @@ namespace FunctionalExtras.Tests
         }
       }
     }
+
+    public class MaybeInstances
+    {
+      public class Alt
+      {
+        [Fact]
+        public void shouldReturnNothingForBothNothing()
+        {
+          Maybe<bool> testMaybe = Maybe<bool>.Nothing<bool>();
+          Maybe<bool> testAlt = Maybe<bool>.Nothing<bool>();
+          Maybe<bool> expectedResult = Maybe<bool>.Nothing<bool>();
+          Maybe<bool> actualResult = testMaybe.alt(testAlt);
+
+          Assert.Equal(expectedResult, actualResult);
+        }
+      }
+    }
   }
 }
