@@ -234,7 +234,7 @@ namespace FunctionalExtras.Tests
           Maybe<bool> testMaybe = Maybe<bool>.Nothing<bool>();
           Maybe<bool> testAlt = Maybe<bool>.Nothing<bool>();
           Maybe<bool> expectedResult = Maybe<bool>.Nothing<bool>();
-          Maybe<bool> actualResult = testMaybe.alt(testAlt);
+          Maybe<bool> actualResult = testMaybe.Alt(testAlt);
 
           Assert.Equal(expectedResult, actualResult);
         }
