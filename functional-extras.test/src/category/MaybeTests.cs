@@ -154,6 +154,41 @@ namespace FunctionalExtras.Tests
           Assert.Equal(expectedResult, actualResult);
         }
       }
+
+      public class MaybeMapCurried
+      {
+        private string _defaultValue = "default";
+        private Func<bool, string> _defaultMapper = b => b.ToString();
+
+        [Fact]
+        public void shouldApplyMapperForJust()
+        {
+          string expectedResult = _testValue.ToString();
+          string actualResult = Maybe<string>.MaybeMap(_defaultValue, _defaultMapper)(_testMaybe);
+
+          Assert.Equal(expectedResult, actualResult);
+        }
+
+        [Fact]
+        public void shouldReturnDefaultValueForNull()
+        {
+          Maybe<bool> testMaybe = null;
+          string expectedResult = _defaultValue;
+          string actualResult = Maybe<string>.MaybeMap(_defaultValue, _defaultMapper)(testMaybe);
+
+          Assert.Equal(expectedResult, actualResult);
+        }
+
+        [Fact]
+        public void shouldReturnDefaultValueForNothing()
+        {
+          Maybe<bool> testMaybe = Maybe<bool>.Nothing<bool>();
+          string expectedResult = _defaultValue;
+          string actualResult = Maybe<string>.MaybeMap(_defaultValue, _defaultMapper)(testMaybe);
+
+          Assert.Equal(expectedResult, actualResult);
+        }
+      }
     }
   }
 }
