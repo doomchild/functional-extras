@@ -189,6 +189,39 @@ namespace FunctionalExtras.Tests
           Assert.Equal(expectedResult, actualResult);
         }
       }
+
+      public class Of
+      {
+        [Fact]
+        public void shouldReturnJustForValue()
+        {
+          Maybe<bool> expectedResult = _testMaybe;
+          Maybe<bool> actualResult = Maybe<bool>.Of(_testValue);
+
+          Assert.Equal(expectedResult, actualResult);
+        }
+      }
+
+      public class OfNullable
+      {
+        [Fact]
+        public void shouldReturnNothingForNull()
+        {
+          Maybe<object> expectedResult = Maybe<object>.Nothing<object>();
+          Maybe<object> actualResult = Maybe<object>.OfNullable<object>(null);
+
+          Assert.Equal(expectedResult, actualResult);
+        }
+
+        [Fact]
+        public void shouldReturnJustForValue()
+        {
+          Maybe<bool> expectedResult = _testMaybe;
+          Maybe<bool> actualResult = Maybe<bool>.OfNullable(_testValue);
+
+          Assert.Equal(expectedResult, actualResult);
+        }
+      }
     }
   }
 }
