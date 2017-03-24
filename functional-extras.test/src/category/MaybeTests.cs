@@ -269,11 +269,11 @@ namespace FunctionalExtras.Tests
 
           Assert.Equal(expectedResult, actualResult);
         }
-
-        public class Ap
-        {
-          [Fact]
-          public void shouldApplyForJustOfValueAndFunction()
+      }
+      public class Ap
+      {
+        [Fact]
+        public void shouldApplyForJustOfValueAndFunction()
           {
             Maybe<Func<bool, bool>> testApply = Maybe<Func<bool, bool>>.Just<Func<bool, bool>>(b => !b);
             Maybe<bool> expectedResult = Maybe<bool>.Just(!_testValue);
@@ -282,8 +282,8 @@ namespace FunctionalExtras.Tests
             Assert.Equal(expectedResult, actualResult);
           }
 
-          [Fact]
-          public void shouldNotApplyForNothingOfFunction()
+        [Fact]
+        public void shouldNotApplyForNothingOfFunction()
           {
             Maybe<Func<bool, bool>> testApply = Maybe<Func<bool, bool>>.Nothing<Func<bool, bool>>();
             Maybe<bool> expectedResult = Maybe<bool>.Nothing<bool>();
@@ -292,8 +292,8 @@ namespace FunctionalExtras.Tests
             Assert.Equal(expectedResult, actualResult);
           }
 
-          [Fact]
-          public void shouldNotApplyForNothingOfValue()
+        [Fact]
+        public void shouldNotApplyForNothingOfValue()
           {
             Maybe<bool> testMaybe = Maybe<bool>.Nothing<bool>();
             Maybe<Func<bool, bool>> testApply = Maybe<bool>.Just<Func<bool, bool>>(b => !b);
@@ -302,12 +302,12 @@ namespace FunctionalExtras.Tests
 
             Assert.Equal(expectedResult, actualResult);
           }
-        }
+      }
 
-        public class Bind
-        {
-          [Fact]
-          public void shouldAliasChain()
+      public class Bind
+      {
+        [Fact]
+        public void shouldAliasChain()
           {
             Func<bool, Maybe<bool>> testChain = value => Maybe<bool>.Just(!value);
             Maybe<bool> expectedResult = _testMaybe.Chain(testChain);
@@ -315,12 +315,12 @@ namespace FunctionalExtras.Tests
 
             Assert.Equal(expectedResult, actualResult);
           }
-        }
+      }
 
-        public class Chain
-        {
-          [Fact]
-          public void shouldChainForJust()
+      public class Chain
+      {
+        [Fact]
+        public void shouldChainForJust()
           {
             Func<bool, Maybe<bool>> testChain = value => Maybe<bool>.Just(!value);
             Maybe<bool> expectedResult = Maybe<bool>.Just(!_testValue);
@@ -329,8 +329,8 @@ namespace FunctionalExtras.Tests
             Assert.Equal(expectedResult, actualResult);
           }
 
-          [Fact]
-          public void shouldNotChainForNothing()
+        [Fact]
+        public void shouldNotChainForNothing()
           {
             Maybe<bool> testMaybe = Maybe<bool>.Nothing<bool>();
             Func<bool, Maybe<bool>> testChain = value => Maybe<bool>.Just(!value);
@@ -339,15 +339,15 @@ namespace FunctionalExtras.Tests
 
             Assert.Equal(expectedResult, actualResult);
           }
-        }
+      }
 
-        public class CheckedMap
-        {
-          private Func<bool, bool> _testMap = b => !b;
-          private Func<bool, bool> _testThrowMap = value => throw new Exception();
+      public class CheckedMap
+      {
+        private Func<bool, bool> _testMap = b => !b;
+        private Func<bool, bool> _testThrowMap = value => throw new Exception();
 
-          [Fact]
-          public void shouldMapForJust()
+        [Fact]
+        public void shouldMapForJust()
           {
             Maybe<bool> testMaybe = Maybe<bool>.Just(_testValue);
             Maybe<bool> expectedResult = Maybe<bool>.Just(!_testValue);
@@ -356,8 +356,8 @@ namespace FunctionalExtras.Tests
             Assert.Equal(expectedResult, actualResult);
           }
 
-          [Fact]
-          public void shouldNotMapForNothing()
+        [Fact]
+        public void shouldNotMapForNothing()
           {
             Maybe<bool> testMaybe = Maybe<bool>.Nothing<bool>();
             Maybe<bool> expectedResult = Maybe<bool>.Nothing<bool>();
@@ -366,8 +366,8 @@ namespace FunctionalExtras.Tests
             Assert.Equal(expectedResult, actualResult);
           }
 
-          [Fact]
-          public void shouldMapThrownToNothing()
+        [Fact]
+        public void shouldMapThrownToNothing()
           {
             Maybe<bool> testMaybe = Maybe<bool>.Just(_testValue);
             Maybe<bool> expectedResult = Maybe<bool>.Nothing<bool>();
@@ -375,12 +375,12 @@ namespace FunctionalExtras.Tests
 
             Assert.Equal(expectedResult, actualResult);
           }
-        }
+      }
 
-        public class Coalesce
-        {
-          [Fact]
-          public void shouldAliasAlt()
+      public class Coalesce
+      {
+        [Fact]
+        public void shouldAliasAlt()
           {
             Maybe<bool> testMaybe = Maybe<bool>.Nothing<bool>();
             Maybe<bool> expectedResult = testMaybe.Alt(_testMaybe);
@@ -388,7 +388,220 @@ namespace FunctionalExtras.Tests
 
             Assert.Equal(expectedResult, actualResult);
           }
-        }
+      }
+
+      public class Extend
+      {
+        [Fact]
+        public void shouldExtendForJust()
+          {
+            bool testDefaultValue = false;
+            Func<Maybe<bool>, bool> testExtend = maybe => maybe
+              //TODO(lee.crabtree): change to Predicates::Negate when you write it.
+              .Map(b => !b)
+              .GetOrElse(testDefaultValue);
+            Maybe<bool> expectedResult = Maybe<bool>.Just(!_testValue);
+            Maybe<bool> actualResult = _testMaybe.Extend(testExtend);
+
+            Assert.Equal(expectedResult, actualResult);
+          }
+
+        [Fact]
+        public void shouldNotExtendForNothing()
+          {
+            bool testDefaultValue = false;
+            Maybe<bool> testMaybe = Maybe<bool>.Nothing<bool>();
+            Func<Maybe<bool>, bool> testExtend = maybe => maybe
+              //TODO(lee.crabtree): change to Predicates::Negate when you write it.
+              .Map(b => !b)
+              .GetOrElse(testDefaultValue);
+            Maybe<bool> expectedResult = Maybe<bool>.Nothing<bool>();
+            Maybe<bool> actualResult = testMaybe.Extend(testExtend);
+
+            Assert.Equal(expectedResult, actualResult);
+          }
+      }
+
+      public class Filter
+      {
+        [Fact]
+        public void shouldFilterJustToJust()
+          {
+            string testValue = "test";
+            Maybe<string> testMaybe = Maybe<string>.Just(testValue);
+            //TODO(lee.crabtree): change to Predicates::AlwaysTrue when you write it.
+            Predicate<string> testPredicate = s => true;
+            Maybe<string> expectedResult = testMaybe;
+            Maybe<string> actualResult = testMaybe.Filter(testPredicate);
+
+            Assert.Equal(expectedResult, actualResult);
+          }
+
+        [Fact]
+        public void shouldFilterJustToNothing()
+          {
+            string testValue = "test";
+            Maybe<string> testMaybe = Maybe<string>.Just(testValue);
+            //TODO(lee.crabtree): change to Predicates::AlwaysFalse when you write it.
+            Predicate<string> testPredicate = s => false;
+            Maybe<string> expectedResult = Maybe<string>.Nothing<string>();
+            Maybe<string> actualResult = testMaybe.Filter(testPredicate);
+
+            Assert.Equal(expectedResult, actualResult);
+          }
+
+        [Fact]
+        public void shouldNotFilterNothingToJust()
+          {
+            Maybe<string> testMaybe = Maybe<string>.Nothing<string>();
+            //TODO(lee.crabtree): change to Predicates::AlwaysFalse when you write it.
+            Predicate<string> testPredicate = s => false;
+            Maybe<string> expectedResult = testMaybe;
+            Maybe<string> actualResult = testMaybe.Filter(testPredicate);
+
+            Assert.Equal(expectedResult, actualResult);
+          }
+      }
+
+      public class FlatMap
+      {
+        [Fact]
+        public void shouldAliasChain()
+          {
+            Func<bool, Maybe<bool>> testChain = value => Maybe<bool>.Just(!value);
+            Maybe<bool> expectedResult = _testMaybe.Chain(testChain);
+            Maybe<bool> actualResult = _testMaybe.FlatMap(testChain);
+
+            Assert.Equal(expectedResult, actualResult);
+          }
+      }
+
+      public class FoldLeft
+      {
+        private static readonly string _testInitialValue = "initialValue";
+        private static readonly string _expectedResult = "expectedResult";
+        private static readonly Func<string, bool, string> _testLeftFold = (initialValue, underlyingValue) => _expectedResult;
+
+        [Fact]
+        public void shouldReturnValueForJust()
+          {
+            string actualResult = _testMaybe.FoldLeft(_testLeftFold, _testInitialValue);
+
+            Assert.Equal(_expectedResult, actualResult);
+          }
+
+        [Fact]
+        public void shouldReturnValueForNothing()
+          {
+            Maybe<bool> testMaybe = Maybe<bool>.Nothing<bool>();
+            string actualResult = testMaybe.FoldLeft(_testLeftFold, _testInitialValue);
+
+            Assert.Equal(_expectedResult, actualResult);
+          }
+      }
+
+      public class FoldRight
+      {
+        private static readonly string _testInitialValue = "initialValue";
+        private static readonly string _expectedResult = "expectedResult";
+        private static readonly Func<bool, string, string> _testRightFold = (underlyingValue, initialValue) => _expectedResult;
+
+        [Fact]
+        public void shouldReturnValueForJust()
+          {
+            string actualResult = _testMaybe.FoldRight(_testRightFold, _testInitialValue);
+
+            Assert.Equal(_expectedResult, actualResult);
+          }
+
+        [Fact]
+        public void shouldReturnValueForNothing()
+          {
+            Maybe<bool> testMaybe = Maybe<bool>.Nothing<bool>();
+            string actualResult = testMaybe.FoldRight(_testRightFold, _testInitialValue);
+
+            Assert.Equal(_expectedResult, actualResult);
+          }
+      }
+
+      public class GetOrElse
+      {
+
+      }
+
+      public class GetOrElseGet
+      {
+
+      }
+
+      public class GetOrElseThrow
+      {
+
+      }
+
+      public class HashCode
+      {
+
+      }
+
+      public class IfJust
+      {
+
+      }
+
+      public class IfNothing
+      {
+
+      }
+
+      public class IsJust
+      {
+
+      }
+
+      public class IsNothing
+      {
+
+      }
+
+      public class Map
+      {
+
+      }
+
+      public class Recover
+      {
+
+      }
+
+      public class Tap
+      {
+
+      }
+
+      public class ToEither
+      {
+
+      }
+
+      public class ToList
+      {
+
+      }
+
+      public class ToNullable
+      {
+
+      }
+
+      public class ToIEnumerable
+      {
+
+      }
+
+      public class ToValidation
+      {
+
       }
     }
   }

@@ -38,6 +38,13 @@ namespace FunctionalExtras.Category
         : Just(value);
     }
 
+    public static Maybe<R> From<R>(Nullable<R> value) where R : struct
+    {
+      return (value.HasValue)
+        ? Just(value.Value)
+        : Nothing<R>();
+    }
+
     public static Maybe<R> From<R>(Maybe<R> maybe)
     {
       return maybe ?? Nothing<R>();
@@ -301,6 +308,13 @@ namespace FunctionalExtras.Category
         .IfJust(consumer);
     }
 
+    public IList<V> ToList()
+    {
+      return IsJust()
+        ? new List<V> { _value }
+        : new List<V>();
+    }
+    
     public override int GetHashCode()
     {
       return _value.GetHashCode();
