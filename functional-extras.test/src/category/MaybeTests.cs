@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 
 using Xunit;
+using Moq;
 
 using FunctionalExtras.Category;
 
@@ -526,52 +527,236 @@ namespace FunctionalExtras.Tests
 
       public class GetOrElse
       {
+        [Fact]
+        public void shouldReturnValueForJust()
+        {
+          bool testDefaultValue = !_testValue;
+          bool expectedResult = _testValue;
+          bool actualResult = _testMaybe.GetOrElse(testDefaultValue);
 
+          Assert.Equal(expectedResult, actualResult);
+        }
+
+        [Fact]
+        public void shouldReturnOtherValueForNothing()
+        {
+          bool testDefaultValue = !_testValue;
+          Maybe<bool> testMaybe = Maybe<bool>.Nothing<bool>();
+          bool expectedResult = !_testValue;
+          bool actualResult = testMaybe.GetOrElse(testDefaultValue);
+
+          Assert.Equal(expectedResult, actualResult);
+        }
       }
 
       public class GetOrElseGet
       {
+        [Fact]
+        public void shouldReturnValueForJust()
+        {
+          //TODO(lee.crabtree): replace with Suppliers.Always(!testValue) when I write it.
+          Func<bool> testSupplier = () => !_testValue;
+          bool expectedResult = _testValue;
+          bool actualResult = _testMaybe.GetOrElseGet(testSupplier);
 
+          Assert.Equal(expectedResult, actualResult);
+        }
+
+        [Fact]
+        public void shouldReturnOtherValueForNothing()
+        {
+          Maybe<bool> testMaybe = Maybe<bool>.Nothing<bool>();
+          //TODO(lee.crabtree): replace with Suppliers.Always(!testValue) when I write it.
+          Func<bool> testSupplier = () => !_testValue;
+          bool expectedResult = !_testValue;
+          bool actualResult = testMaybe.GetOrElseGet(testSupplier);
+
+          Assert.Equal(expectedResult, actualResult);
+        }
       }
 
       public class GetOrElseThrow
       {
+        [Fact]
+        public void shouldReturnValueForJust()
+        {
+          Func<Exception> testSupplier = () => new Exception();
+          bool expectedResult = _testValue;
+          bool actualResult = _testMaybe.GetOrElseThrow(testSupplier);
 
+          Assert.Equal(expectedResult, actualResult);
+        }
+
+        [Fact]
+        public void shouldThrowForNothing()
+        {
+          Func<Exception> testSupplier = () => new Exception();
+          Maybe<bool> testMaybe = Maybe<bool>.Nothing<bool>();
+          Exception exception = Record.Exception(() => testMaybe.GetOrElseThrow(testSupplier));
+
+          Assert.NotNull(exception);
+          Assert.IsType<Exception>(exception);
+        }
       }
 
       public class HashCode
       {
+        [Fact]
+        public void shouldReturn1ForNothing()
+        {
+          Maybe<bool> testMaybe = Maybe<bool>.Nothing<bool>();
+          int expectedResult = 1;
+          int actualResult = testMaybe.GetHashCode();
 
+          Assert.Equal(expectedResult, actualResult);
+        }
+
+        [Fact]
+        public void shouldReturnValueHashCodeForJust()
+        {
+          int expectedResult = _testValue.GetHashCode();
+          int actualResult = _testMaybe.GetHashCode();
+
+          Assert.Equal(expectedResult, actualResult);
+        }
       }
 
       public class IfJust
       {
+        [Fact]
+        public void shouldCallIfJustForJust()
+        {
+          Maybe<bool> testMaybe = Maybe<bool>.Just(_testValue);
+          Mock<Action<bool>> testConsumer = new Mock<Action<bool>>();
+          int expectedInvocations = 1;
 
+          testMaybe.IfJust(testConsumer.Object);
+
+          testConsumer.Verify(f => f(_testValue), Times.Exactly(expectedInvocations));
+        }
+
+        [Fact]
+        public void shouldNotCallIfJustForNothing()
+        {
+          Maybe<bool> testMaybe = Maybe<bool>.Nothing<bool>();
+          Mock<Action<bool>> testConsumer = new Mock<Action<bool>>();
+          int expectedInvocations = 0;
+
+          testMaybe.IfJust(testConsumer.Object);
+
+          testConsumer.Verify(f => f(_testValue), Times.Exactly(expectedInvocations));
+        }
       }
 
       public class IfNothing
       {
+        [Fact]
+        public void shouldCallIfNothingForNothing()
+        {
+          Maybe<bool> testMaybe = Maybe<bool>.Nothing<bool>();
+          Mock<Action> testRunnable = new Mock<Action>();
+          int expectedInvocations = 1;
 
+          testMaybe.IfNothing(testRunnable.Object);
+
+          testRunnable.Verify(f => f(), Times.Exactly(expectedInvocations));
+        }
+
+        [Fact]
+        public void shouldNotCallIfNothingForJust()
+        {
+          Maybe<bool> testMaybe = Maybe<bool>.Just(_testValue);
+          Mock<Action> testRunnable = new Mock<Action>();
+          int expectedInvocations = 0;
+
+          testMaybe.IfNothing(testRunnable.Object);
+
+          testRunnable.Verify(f => f(), Times.Exactly(expectedInvocations));
+        }
       }
 
       public class IsJust
       {
+        [Fact]
+        public void shouldReturnTrueForJust()
+        {
+          Assert.True(_testMaybe.IsJust());
+        }
 
+        [Fact]
+        public void shouldReturnFalseForNothing()
+        {
+          Maybe<bool> testMaybe = Maybe<bool>.Nothing<bool>();
+
+          Assert.False(testMaybe.IsJust());
+        }
       }
 
       public class IsNothing
       {
+        [Fact]
+        public void shouldReturnFalseForJust()
+        {
+          Assert.False(_testMaybe.IsNothing());
+        }
 
+        [Fact]
+        public void shouldReturnTrueForNothing()
+        {
+          Maybe<bool> testMaybe = Maybe<bool>.Nothing<bool>();
+
+          Assert.True(testMaybe.IsNothing());
+        }
       }
 
       public class Map
       {
+        //TODO(lee.crabtree): replace with Predicates::Negate when I write it.
+        private readonly Func<bool, bool> _testMap = b => !b;
 
+        [Fact]
+        public void shouldMapForJust()
+        {
+          Maybe<bool> testMaybe = Maybe<bool>.Just(_testValue);
+          Maybe<bool> expectedResult = Maybe<bool>.Just(!_testValue);
+          Maybe<bool> actualResult = testMaybe.Map(_testMap);
+
+          Assert.Equal(expectedResult, actualResult);
+        }
+
+        [Fact]
+        public void shouldNotMapForNothing()
+        {
+          Maybe<bool> testMaybe = Maybe<bool>.Nothing<bool>();
+          Maybe<bool> expectedResult = Maybe<bool>.Nothing<bool>();
+          Maybe<bool> actualResult = testMaybe.Map(_testMap);
+
+          Assert.Equal(expectedResult, actualResult);
+        }
       }
 
       public class Recover
       {
+        private readonly bool _testRecover = !_testValue;
 
+        [Fact]
+        public void shouldReturnValueForJust()
+        {
+          Maybe<bool> expectedResult = _testMaybe;
+          Maybe<bool> actualResult = _testMaybe.Recover(_testRecover);
+
+          Assert.Equal(expectedResult, actualResult);
+        }
+
+        [Fact]
+        public void shouldReturnValueForNothing()
+        {
+          Maybe<bool> testMaybe = Maybe<bool>.Nothing<bool>();
+          Maybe<bool> expectedResult = Maybe<bool>.Just(_testRecover);
+          Maybe<bool> actualResult = testMaybe.Recover(_testRecover);
+
+          Assert.Equal(expectedResult, actualResult);
+        }
       }
 
       public class Tap
@@ -586,22 +771,51 @@ namespace FunctionalExtras.Tests
 
       public class ToList
       {
+        [Fact]
+        public void shouldReturnListForJust()
+        {
+          IList<bool> expectedResult = new List<bool> { _testValue };
+          IList<bool> actualResult = _testMaybe.ToList();
 
-      }
+          Assert.Equal(expectedResult, actualResult);
+        }
 
-      public class ToNullable
-      {
+        [Fact]
+        public void shouldReturnEmptyListForNothing()
+        {
+          Maybe<bool> testMaybe = Maybe<bool>.Nothing<bool>();
+          IList<bool> expectedResult = new List<bool>();
+          IList<bool> actualResult = testMaybe.ToList();
 
-      }
-
-      public class ToIEnumerable
-      {
-
+          Assert.Equal(expectedResult, actualResult);
+        }
       }
 
       public class ToValidation
       {
 
+      }
+
+      public class String
+      {
+        [Fact]
+        public void shouldReturnMaybeValueForJust()
+        {
+          string expectedResult = "Maybe{" + _testValue + "}";
+          string actualResult = _testMaybe.ToString();
+
+          Assert.Equal(expectedResult, actualResult);
+        }
+
+        [Fact]
+        public void shouldReturnNothingForNothing()
+        {
+          Maybe<object> testMaybe = Maybe<object>.Nothing<object>();
+          string expectedResult = "Nothing";
+          string actualResult = testMaybe.ToString();
+
+          Assert.Equal(expectedResult, actualResult);
+        }
       }
     }
   }

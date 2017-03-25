@@ -314,10 +314,12 @@ namespace FunctionalExtras.Category
         ? new List<V> { _value }
         : new List<V>();
     }
-    
+
     public override int GetHashCode()
     {
-      return _value.GetHashCode();
+      return IsNothing()
+        ? 1
+        : _value.GetHashCode();
     }
 
     public override bool Equals(object obj)
